@@ -1,4 +1,5 @@
 mod db;
+use colored::{self, Colorize};
 
 #[tokio::main]
 async fn main() {
@@ -6,25 +7,30 @@ async fn main() {
 }
 
 async fn menu() {
-    println!("1 - Encurtar URL");
-    println!("2 - Desencurtar URL");
 
-    let mut opc = String::new();
+    let pool: sqlx::Pool<sqlx::Postgres> = db::connect_db().await.expect("Error ao chamar db");
 
-    std::io::stdin()
-    .read_line(&mut opc)
-    .unwrap();
+    loop {
+        println!("1 - Encurtar URL");
+        println!("2 - Desencurtar URL\n");
 
-    let opc: u8 = opc.trim().parse().unwrap();
+        let mut opc = String::new();
 
-    match opc {
-        1 => encurtar_url().await,
-        2 => desencurtar_url().await,
-        _ => println!("Entrada inválida"),
-    };
+        std::io::stdin()
+        .read_line(&mut opc)
+        .unwrap();
+
+        let opc: u8 = opc.trim().parse().unwrap();
+
+        match opc {
+            1 => encurtar_url(&pool).await,
+            2 => desencurtar_url().await,
+            _ => println!("Entrada inválida"),
+        };
+    }
 }
 
-async fn encurtar_url() {
+async fn encurtar_url(pool: &sqlx::PgPool) {
     println!("Digite a url: ");
 
     let mut url = String::new();
@@ -32,9 +38,13 @@ async fn encurtar_url() {
     .read_line(&mut url)
     .unwrap();
 
-    let _encurtar = db::shorten(url).await.unwrap();
+
+    let encurtar = db::shorten(&pool, url).await.unwrap();
     
-    println!("URL encurtada");
+    println!("{}", "-".repeat(78));
+    println!("\t{}: {}","URL encurtada".bold().green(),encurtar.blue());
+    println!("{}\n", "-".repeat(78));
+
 }
 
 async fn desencurtar_url() {

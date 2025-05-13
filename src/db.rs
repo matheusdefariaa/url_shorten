@@ -28,17 +28,15 @@ pub async fn connect_db() -> Result<sqlx::PgPool, sqlx::Error> {
 }
 
 
-pub async fn shorten(url_real: String) -> Result<(), sqlx::Error> {
-    let pool: sqlx::Pool<sqlx::Postgres> = connect_db().await.expect("Error ao chamar db");
+pub async fn shorten(pool: &sqlx::PgPool, url_real: String) -> Result<String, sqlx::Error> {
+    // let pool: sqlx::Pool<sqlx::Postgres> = connect_db().await.expect("Error ao chamar db");
 
-    let url_shorten = format!("encurtador.com/{}",Uuid::new_v4());
+    let url_shorten = format!("encurtador.com/{}",Uuid::new_v4().as_simple());
 
     sqlx::query("INSERT INTO url (url_shorten, unshorten) VALUES ($1,$2)")
-        .bind(url_shorten)
+        .bind(&url_shorten)
         .bind(url_real)
-        .execute(&pool)
-        .await
-        .unwrap();
-
-    Ok(())
+        .execute(pool)
+        .await?;
+    Ok(url_shorten)
 }
