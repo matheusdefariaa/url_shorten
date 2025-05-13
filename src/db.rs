@@ -2,6 +2,8 @@ use sqlx::postgres::PgPoolOptions;
 use dotenv::dotenv;
 use std::env;
 use uuid::Uuid;
+use crate::error::AppError;
+
 
 
 pub async fn connect_db() -> Result<sqlx::PgPool, sqlx::Error> {

@@ -1,5 +1,8 @@
 mod db;
+mod error;
+
 use colored::{self, Colorize};
+use error::AppError;
 
 #[tokio::main]
 async fn main() {
@@ -20,24 +23,25 @@ async fn menu() {
         .read_line(&mut opc)
         .unwrap();
 
-        let opc: u8 = opc.trim().parse().unwrap();
+        let opc: u8 = opc.trim().parse().expect("Error em opc");
 
-        match opc {
+        let _: Result<(), AppError> = match opc {
             1 => encurtar_url(&pool).await,
             2 => desencurtar_url().await,
-            _ => println!("Entrada inválida"),
+            _ => continue,
         };
     }
 }
 
-async fn encurtar_url(pool: &sqlx::PgPool) {
+async fn encurtar_url(pool: &sqlx::PgPool) -> Result<(), error::AppError> {
     println!("Digite a url: ");
 
     let mut url = String::new();
     std::io::stdin()
     .read_line(&mut url)
-    .unwrap();
+    .expect("Falha ao criar string");
 
+    let url = url.trim().to_string();
 
     let encurtar = db::shorten(&pool, url).await.unwrap();
     
@@ -45,8 +49,10 @@ async fn encurtar_url(pool: &sqlx::PgPool) {
     println!("\t{}: {}","URL encurtada".bold().green(),encurtar.blue());
     println!("{}\n", "-".repeat(78));
 
+    Ok(())
+
 }
 
-async fn desencurtar_url() {
-    todo!()
+async fn desencurtar_url() -> Result<(),error::AppError> {
+    Err(error::AppError::DatabaseError((sqlx::Error::BeginFailed)))
 }
