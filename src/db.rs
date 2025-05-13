@@ -28,7 +28,7 @@ pub async fn connect_db() -> Result<sqlx::PgPool, sqlx::Error> {
 }
 
 
-pub async fn shorten(url_real: String) -> String {
+pub async fn shorten(url_real: String) -> Result<(), sqlx::Error> {
     let pool: sqlx::Pool<sqlx::Postgres> = connect_db().await.expect("Error ao chamar db");
 
     let url_shorten = format!("encurtador.com/{}",Uuid::new_v4());
@@ -40,5 +40,5 @@ pub async fn shorten(url_real: String) -> String {
         .await
         .unwrap();
 
-    "a".to_string()
+    Ok(())
 }

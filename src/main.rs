@@ -32,7 +32,7 @@ async fn encurtar_url() {
     .read_line(&mut url)
     .unwrap();
 
-    let _encurtar = db::shorten(url).await;
+    let _encurtar = db::shorten(url).await.unwrap();
     
     println!("URL encurtada");
 }
