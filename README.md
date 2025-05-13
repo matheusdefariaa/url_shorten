@@ -7,3 +7,4 @@
     * sqlx
     * dotenv
     * uuid
+    * tokio
